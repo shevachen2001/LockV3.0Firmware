@@ -223,7 +223,7 @@ void Touch_KeyProc(uint8* pTouchKey,uint8 lenth)
 	{
 		Access_OpenError();
 #if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
-        Access_WriteRecordFlash(pTouchKey, ProtoAnaly_RtcLocalTime, KEY_TYPE_PASSWORD, ACCESS_CLOSE_LOCK_TPYE);
+    Access_WriteRecordFlash(pTouchKey, ProtoAnaly_RtcLocalTime, KEY_TYPE_PASSWORD, ACCESS_CLOSE_LOCK_TPYE);
 #endif
 		Access_Globle.ErrorTimes++;
 		if(Access_Globle.ErrorTimes >= 5)
@@ -427,7 +427,7 @@ void Touch_Proc(void)
 		Event_Remove(EVE_ENTER_LONG);
 		Access_Lock();
 #if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
-        Access_WriteRecordFlash(pKey, ProtoAnaly_RtcLocalTime, KEY_TYPE_LONG_KEY_PRESS_LOCK, ACCESS_OPEN_LOCK_TPYE);
+    Access_WriteRecordFlash(pKey, ProtoAnaly_RtcLocalTime, KEY_TYPE_LONG_KEY_PRESS_LOCK, ACCESS_OPEN_LOCK_TPYE);
 #endif
 		return;
 	}

@@ -937,7 +937,7 @@ void Motor_Proc(void)
 				{
 					Access_Lock();
 #if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
-                    Access_WriteRecordFlash(pKey, 0, KEY_TYPE_AUTOLOCK, ACCESS_OPEN_LOCK_TPYE);
+					Access_WriteRecordFlash(pKey, 0, KEY_TYPE_AUTOLOCK, ACCESS_OPEN_LOCK_TPYE);
 #endif
 				}
 			}
@@ -1007,9 +1007,9 @@ void Motor_Proc(void)
 				}
 				
 #if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
-                if(3 == Motor_DoorSw)
-                {
-                    Access_WriteRecordFlash(pKey, 0, KEY_TYPE_DOOR_CLOSED, ACCESS_OPEN_LOCK_TPYE);
+				if(3 == Motor_DoorSw)
+				{
+				  Access_WriteRecordFlash(pKey, 0, KEY_TYPE_DOOR_CLOSED, ACCESS_OPEN_LOCK_TPYE);
 				}
 #endif
 			}
@@ -1025,7 +1025,7 @@ void Motor_Proc(void)
 							Motor_DoorLockSt = MOTOR_DOORLOCK_OPEN;
 						}
 #if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
-                        Access_WriteRecordFlash(pKey, 0, KEY_TYPE_DOOR_OPEN, ACCESS_OPEN_LOCK_TPYE);
+						Access_WriteRecordFlash(pKey, 0, KEY_TYPE_DOOR_OPEN, ACCESS_OPEN_LOCK_TPYE);
 #endif
 					}
 				}
