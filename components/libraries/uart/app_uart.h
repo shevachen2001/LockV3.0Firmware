@@ -221,6 +221,13 @@ uint32_t app_uart_flush(void);
  */
 uint32_t app_uart_close(void);
 
+/**@brief Function for printing debug logs on serial console.
+ *
+ * @param[in] Variable number of arguments
+ *
+ * @retval  None
+ */
+void consoleLog(uint8_t* format, ...);
 
 #endif //APP_UART_H__
 

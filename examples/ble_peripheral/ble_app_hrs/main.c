@@ -1165,6 +1165,8 @@ int main(void)
 {
     uint32_t err_code;
     bool erase_bonds;	
+    uint8_t pKey[4] = {0xAA, 0xAA, 0xAA, 0xAA};
+
     app_trace_init();
 	
 	  if(xbug==1)
@@ -1204,6 +1206,10 @@ int main(void)
 		   uartSendstring((unsigned char*)"1234567\r\n");
 		}
 		
+#if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
+		// Record log for reboot 
+ 		Access_WriteRecordFlash(pKey, ProtoAnaly_RtcLocalTime, KEY_TYPE_REBOOT, ACCESS_OPEN_LOCK_TPYE);
+#endif
     for (;;)
     {
 		    power_enter_sleepdet();

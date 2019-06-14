@@ -920,6 +920,8 @@ void Motor_Proc(void)
 ****************************************************************************************************/
  Std_ReturnType Motor_IoCtl(uint8 Cmd,void *pData)
  {
+    uint8_t  pKey[4] = {0xAA, 0xAA, 0xAA, 0xAA};
+
  	switch(Cmd)
  	{
 		case MOTOR_CMD_SCAN:
@@ -934,6 +936,9 @@ void Motor_Proc(void)
 				if(Motor_AutoLockTimer64ms == 0)
 				{
 					Access_Lock();
+#if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
+                    Access_WriteRecordFlash(pKey, 0, KEY_TYPE_AUTOLOCK, ACCESS_OPEN_LOCK_TPYE);
+#endif
 				}
 			}
 			if(Motor_DetectSw == 0xff)
@@ -1000,6 +1005,13 @@ void Motor_Proc(void)
 						}
 					}
 				}
+				
+#if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
+                if(3 == Motor_DoorSw)
+                {
+                    Access_WriteRecordFlash(pKey, 0, KEY_TYPE_DOOR_CLOSED, ACCESS_OPEN_LOCK_TPYE);
+				}
+#endif
 			}
 			else
 			{
@@ -1012,6 +1024,9 @@ void Motor_Proc(void)
 						{/* 门被打开*/
 							Motor_DoorLockSt = MOTOR_DOORLOCK_OPEN;
 						}
+#if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
+                        Access_WriteRecordFlash(pKey, 0, KEY_TYPE_DOOR_OPEN, ACCESS_OPEN_LOCK_TPYE);
+#endif
 					}
 				}
 			}
