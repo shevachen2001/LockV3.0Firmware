@@ -76,6 +76,7 @@ uint32 Sys_RestTimex64ms;
 
 uint32 Sys_WkTick = 0;
 uint32 NwxtSys_Tick = 0;
+uint16_t BatteryMilliVolt = 0;
 uint8  Sys_WkupType;
 uint8  Sys_ResetDevice;
 uint8  Sys_frstPoweron;
@@ -623,7 +624,8 @@ uint8 Sys_GetBat(void)
 	AdcNrfDrive.open(NULL);
 	AdcNrfDrive.read(&battv);
 	
-	battv = battv*2 +300;	
+	battv = battv*2 +300;
+	BatteryMilliVolt = battv;
 
 	if(battv >= Batt_VolPerTable[0][0])
 	{
@@ -654,29 +656,6 @@ uint8 Sys_GetBat(void)
 	}
 	return duty;
 }
-
-/****************************************************************************************************
-**Function:
-	void Sys_ReadBattVoltagemV(void)
-**Author: RahulR
-**Description: 1. Opens ADC driver
-               2. Reads raw battery voltage
-               3. Applies scaling to convert raw value into millivolt
-**Input: None
-**Output: Returns battery voltage in millivolt
-****************************************************************************************************/
-uint16 Sys_ReadBattVoltagemV(void)
-{	
-	uint16 battv;
-
-	AdcNrfDrive.open(NULL);
-	AdcNrfDrive.read(&battv);
-	
-	battv = (battv << 1) + 300;
-
-	return battv;
-}
-
 /****************************************************************************************************
 **Function:
 void Sys_Init(void)

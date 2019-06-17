@@ -94,6 +94,9 @@ extern uint8  ProtoAnaly_LoraBrgSize;
 extern uint8 SysSleepFlag;
 //extern uint8  Sys_frstPoweron;
 extern uint8 BattdetTimer;
+extern uint8_t pKey[4];
+extern uint16_t BatteryMilliVolt;
+extern uint8_t LogCodeType;
 /****************************************************************************************************
 **Function:
 	void Access_Init(void)
@@ -762,14 +765,9 @@ void Access_Unlock(void)
 	Access_Globle.ErrorTimes =0;
 	Access_LockDeviceTimer64ms = 0;
 
-    if(Sys_ReadBattVoltagemV() < LOW_BATTERY_VOLTAGE_MILLIVOLT)
+    if(BatteryMilliVolt < LOW_BATTERY_VOLTAGE_MILLIVOLT)
     {
-        // Virtual values for key
-        uint8_t pKey[4] = {0xAA, 0xAA, 0xAA, 0xAA};
-
-#if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
-        Access_WriteRecordFlash(pKey, ProtoAnaly_RtcLocalTime, KEY_TYPE_LOW_BATTERY, ACCESS_CLOSE_LOCK_TPYE);
-#endif
+        LogCodeType = KEY_TYPE_LOW_BATTERY;
     }
 
 	if( Access_BatteryData<Batt_VolPerTable[BATT_VOLPER_MAX-2][1] )
@@ -1057,9 +1055,10 @@ void Access_WriteRecordFlash(uint8* pKeyId,uint32 time ,uint8 type, uint8 action
 		AccRcord.Wrecordindex = 0;
 	}
 	// Read latest updated time
+#if (defined RTC_EN) && (RTC_EN == STD_TRUE)
 	ProtoAnaly_UpdateTime();
 	time = ProtoAnaly_RtcLocalTime;
-
+#endif
 	AccRcord.RecordList[AccRcord.Wrecordindex].Id = BUILD_UINT32(pKeyId[3], pKeyId[2], pKeyId[1], pKeyId[0]);
 	AccRcord.RecordList[AccRcord.Wrecordindex].Time = time;
 	AccRcord.RecordList[AccRcord.Wrecordindex].TypeResult = BUILD_ACTIONTYPE(type, action);
@@ -1377,11 +1376,11 @@ void Access_CardProcess(uint8 idtpye, uint8* pUid,Access_CardDatType *CardDat)
 #endif			
 	}
 	ERR:
+	Access_OpenError();
 #if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
 	// Record log for failed attempt to access
 	Access_WriteRecordFlash(pUid, ProtoAnaly_RtcLocalTime, idtpye, ACCESS_CLOSE_LOCK_TPYE);
 #endif
-	Access_OpenError();
 	return ;
 	RIGHT:
 	Access_Unlock();

@@ -50,6 +50,7 @@ void uartSendstring(uint8_t *p)
 	 }
 }
 
+#ifdef ENABLE_CONSOLE_LOG
 /****************************************************************************************************
 **Function: convertToBase
 **Author: RahulR
@@ -146,6 +147,7 @@ void consoleLog(uint8_t* format, ...)
     app_uart_put(CHAR_CARRIAGE_RETURN);
     app_uart_put(CHAR_NEW_LINE);
 }
+#endif //ENABLE_CONSOLE_LOG
 
 void uart_init(void)
 {

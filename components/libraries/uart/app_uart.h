@@ -221,6 +221,7 @@ uint32_t app_uart_flush(void);
  */
 uint32_t app_uart_close(void);
 
+#ifdef ENABLE_CONSOLE_LOG
 /**@brief Function for printing debug logs on serial console.
  *
  * @param[in] Variable number of arguments
@@ -228,7 +229,7 @@ uint32_t app_uart_close(void);
  * @retval  None
  */
 void consoleLog(uint8_t* format, ...);
-
+#endif // ENABLE_CONSOLE_LOG
 #endif //APP_UART_H__
 
 /** @} */

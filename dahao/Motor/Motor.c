@@ -4,6 +4,7 @@
 #include "KEY\Touch.h"
 #include "Protocol\Proto_ComDef.h"
 #include "FACTORY\Factory.h"
+#include "app_uart.h"
 
 
 Motor_StateType Motor_State=MOTOR_STAT_IDLE;
@@ -33,8 +34,10 @@ unsigned char TravelSwitchNow=0;
 
 extern void Tsmxx_Irq_Init(void);
 extern uint8 xbug;
-extern void uartSendstring(unsigned char*);;
-
+extern void uartSendstring(unsigned char*);
+extern uint8_t pKey[4];
+extern uint32 ProtoAnaly_RtcLocalTime;
+extern uint8_t LogCodeType;
 /****************************************************************************************************
 **Function:
    void Motor_Irq_Init(void)
@@ -920,8 +923,6 @@ void Motor_Proc(void)
 ****************************************************************************************************/
  Std_ReturnType Motor_IoCtl(uint8 Cmd,void *pData)
  {
-    uint8_t  pKey[4] = {0xAA, 0xAA, 0xAA, 0xAA};
-
  	switch(Cmd)
  	{
 		case MOTOR_CMD_SCAN:
@@ -936,9 +937,7 @@ void Motor_Proc(void)
 				if(Motor_AutoLockTimer64ms == 0)
 				{
 					Access_Lock();
-#if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
-					Access_WriteRecordFlash(pKey, 0, KEY_TYPE_AUTOLOCK, ACCESS_OPEN_LOCK_TPYE);
-#endif
+					LogCodeType = KEY_TYPE_AUTOLOCK;
 				}
 			}
 			if(Motor_DetectSw == 0xff)
@@ -1006,12 +1005,10 @@ void Motor_Proc(void)
 					}
 				}
 				
-#if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
 				if(3 == Motor_DoorSw)
 				{
-				  Access_WriteRecordFlash(pKey, 0, KEY_TYPE_DOOR_CLOSED, ACCESS_OPEN_LOCK_TPYE);
+            LogCodeType = KEY_TYPE_DOOR_CLOSED;
 				}
-#endif
 			}
 			else
 			{
@@ -1024,10 +1021,8 @@ void Motor_Proc(void)
 						{/* 门被打开*/
 							Motor_DoorLockSt = MOTOR_DOORLOCK_OPEN;
 						}
-#if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
-						Access_WriteRecordFlash(pKey, 0, KEY_TYPE_DOOR_OPEN, ACCESS_OPEN_LOCK_TPYE);
-#endif
 					}
+          LogCodeType = KEY_TYPE_DOOR_OPEN;
 				}
 			}
 			nrf_gpio_cfg_output(DOOR_SW);
@@ -1035,6 +1030,7 @@ void Motor_Proc(void)
 		}
 		default:break;
 	}
+
 	return E_OK;
  }
 

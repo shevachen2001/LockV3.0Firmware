@@ -164,7 +164,6 @@ extern void  Sys_Debug(uint8 mode);
 
 extern void Sys_SpiOpen(void);
 extern void Sys_SpiClose(void);
-extern uint16 Sys_ReadBattVoltagemV(void);
 
 #endif
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

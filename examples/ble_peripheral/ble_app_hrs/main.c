@@ -115,6 +115,8 @@
 STATIC_ASSERT(IS_SRVC_CHANGED_CHARACT_PRESENT);                                     /** When having DFU Service support in application the Service Changed Characteristic should always be present. */
 #endif // BLE_DFU_APP_SUPPORT
 
+#define TRUE 1
+#define FALSE !TRUE
 
 /*static */ uint16_t                          m_conn_handle = BLE_CONN_HANDLE_INVALID;   /**< Handle of the current connection. */
 ble_dahao_t                        m_ble_dahao;
@@ -132,8 +134,6 @@ APP_TIMER_DEF(SysBase);
 APP_TIMER_DEF(BleProc);                                                  			
 APP_TIMER_DEF(BattDet);                                                  			
 
-
-
 static dm_application_instance_t         m_app_handle;                              /**< Application identifier allocated by device manager */
 
 static ble_uuid_t m_adv_uuids[] = {{BLE_UUID_DAHAO_SERVICE,         BLE_UUID_TYPE_BLE},
@@ -145,7 +145,6 @@ static ble_dfu_t                         m_dfus;                                
 extern Std_ReturnType power_out_sleep(void);
 extern void Lora_timer_start(uint8 sttype,uint16 time);
 extern void Carddet_timer_start(uint16 time);
-
 extern void Tsmxx_Irq_Init(void);
 
 uint8  xbug=0;
@@ -156,6 +155,9 @@ Proto_NetcommType Proto_NetSendBack = NET_NULL;
 uint8  Lorasendx64ms= 0;
 uint8 SysSleepFlag = STD_FALSE;
 uint8 BattdetTimer = STD_FALSE;
+// Virtual values for key
+uint8_t pKey[4] = {0xAA, 0xAA, 0xAA, 0xAA};
+uint8_t LogCodeType = 0xFF;
 
 extern uint32 Sys_RestTimex64ms;
 extern uint8  protoAnaly_freqsetflag;
@@ -385,10 +387,70 @@ void SysBasetimer_Start(uint16 time)
 	SysSleepFlag = STD_FALSE;
 }
 
+/****************************************************************************************************
+**Function: logLockEvent
+**Author: RahulR
+**Description: This function writes into record flash on verifying physical action of motor
+**Input: None
+**Output: None
+****************************************************************************************************/
+static void logLockEvent(void)
+{
+    uint8_t tempCodeType = LogCodeType;
+    _Bool writeLog = FALSE;
+    uint32_t action = ACCESS_OPEN_LOCK_TPYE;
+
+    switch(tempCodeType)
+    {
+        case KEY_TYPE_LOW_BATTERY:
+            action = ACCESS_CLOSE_LOCK_TPYE;
+            writeLog = TRUE;
+            break;
+        case KEY_TYPE_PASSWORD:
+        case KEY_TYPE_CARD:
+            if(MOTOR_STAT_UNLOCK == Motor_State || MOTOR_POSIT_LOCK == Motor_PositStatus)
+						{
+                writeLog = FALSE;
+            }
+						else
+						{
+                writeLog = TRUE;
+						}
+            break;
+        case KEY_TYPE_LONG_KEY_PRESS_LOCK:
+        case KEY_TYPE_AUTOLOCK:
+					  if(MOTOR_STAT_LOCK == Motor_State || MOTOR_POSIT_UNLOCK == Motor_PositStatus) 
+						{
+                writeLog = FALSE;
+            }
+						else
+						{
+                writeLog = TRUE;
+						}
+            break;
+        case KEY_TYPE_DOOR_OPEN:
+            writeLog = TRUE;
+            break;
+        case KEY_TYPE_DOOR_CLOSED:
+            writeLog = TRUE;
+            break;
+        default:
+            writeLog = FALSE;
+            break;
+    }
+
+		if(TRUE == writeLog)
+    {
+        Access_WriteRecordFlash(pKey, ProtoAnaly_RtcLocalTime, tempCodeType, action);
+        LogCodeType = 0xFF;
+    }
+}
+
 static void SysBase_timer_handler(void * p_context)
 {	
 	if(Sys_State == SYS_SLEEP)
 	{
+    LogCodeType = 0xFF;
 		SysBasetimer_Start(60000);
 		if(Sys_RestTimex64ms > 60000/64)
 		{
@@ -412,6 +474,9 @@ static void SysBase_timer_handler(void * p_context)
 	NrfFlashDrive.ioctl(NRFFLASH_SCAN, NULL);
 #endif
 	Factory_Proc();
+#if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
+	logLockEvent();
+#endif
 	SysBasetimer_Start(64);	
 	if(Sys_RestTimex64ms)
 	{
@@ -1165,8 +1230,6 @@ int main(void)
 {
     uint32_t err_code;
     bool erase_bonds;	
-    uint8_t pKey[4] = {0xAA, 0xAA, 0xAA, 0xAA};
-
     app_trace_init();
 	
 	  if(xbug==1)
