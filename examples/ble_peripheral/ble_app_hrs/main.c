@@ -429,8 +429,6 @@ static void logLockEvent(void)
 						}
             break;
         case KEY_TYPE_DOOR_OPEN:
-            writeLog = TRUE;
-            break;
         case KEY_TYPE_DOOR_CLOSED:
             writeLog = TRUE;
             break;
