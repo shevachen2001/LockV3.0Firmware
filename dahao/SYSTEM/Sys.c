@@ -76,6 +76,7 @@ uint32 Sys_RestTimex64ms;
 
 uint32 Sys_WkTick = 0;
 uint32 NwxtSys_Tick = 0;
+uint16_t BatteryMilliVolt = 0;
 uint8  Sys_WkupType;
 uint8  Sys_ResetDevice;
 uint8  Sys_frstPoweron;
@@ -623,7 +624,8 @@ uint8 Sys_GetBat(void)
 	AdcNrfDrive.open(NULL);
 	AdcNrfDrive.read(&battv);
 	
-	battv = battv*2 +300;	
+	battv = battv*2 +300;
+	BatteryMilliVolt = battv;
 
 	if(battv >= Batt_VolPerTable[0][0])
 	{

@@ -4,6 +4,7 @@
 #include "KEY\Touch.h"
 #include "Protocol\Proto_ComDef.h"
 #include "FACTORY\Factory.h"
+#include "app_uart.h"
 
 
 Motor_StateType Motor_State=MOTOR_STAT_IDLE;
@@ -33,8 +34,10 @@ unsigned char TravelSwitchNow=0;
 
 extern void Tsmxx_Irq_Init(void);
 extern uint8 xbug;
-extern void uartSendstring(unsigned char*);;
-
+extern void uartSendstring(unsigned char*);
+extern uint8_t pKey[4];
+extern uint32 ProtoAnaly_RtcLocalTime;
+extern uint8_t LogCodeType;
 /****************************************************************************************************
 **Function:
    void Motor_Irq_Init(void)
@@ -934,6 +937,7 @@ void Motor_Proc(void)
 				if(Motor_AutoLockTimer64ms == 0)
 				{
 					Access_Lock();
+					LogCodeType = KEY_TYPE_AUTOLOCK;
 				}
 			}
 			if(Motor_DetectSw == 0xff)
@@ -1000,6 +1004,11 @@ void Motor_Proc(void)
 						}
 					}
 				}
+				
+				if(3 == Motor_DoorSw)
+				{
+            LogCodeType = KEY_TYPE_DOOR_CLOSED;
+				}
 			}
 			else
 			{
@@ -1013,6 +1022,7 @@ void Motor_Proc(void)
 							Motor_DoorLockSt = MOTOR_DOORLOCK_OPEN;
 						}
 					}
+          LogCodeType = KEY_TYPE_DOOR_OPEN;
 				}
 			}
 			nrf_gpio_cfg_output(DOOR_SW);
@@ -1020,6 +1030,7 @@ void Motor_Proc(void)
 		}
 		default:break;
 	}
+
 	return E_OK;
  }
 

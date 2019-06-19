@@ -52,6 +52,8 @@
 
 /*static */uint8 TouchBuf[(TOUCH_KEY_BUF_MAX>>1)+1];
 
+extern uint8_t pKey[4];
+extern uint8_t LogCodeType;
 
 uint8 TouchState;
 uint8 TouchKeyIndex;
@@ -205,6 +207,7 @@ void Touch_KeyProc(uint8* pTouchKey,uint8 lenth)
 	if(ret == E_OK)
 	{
 		Access_Unlock();
+    LogCodeType = KEY_TYPE_PASSWORD;
 	}
 	else if(ret == E_END)
 	{
@@ -219,6 +222,9 @@ void Touch_KeyProc(uint8* pTouchKey,uint8 lenth)
 	else
 	{
 		Access_OpenError();
+#if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
+    Access_WriteRecordFlash(pTouchKey, ProtoAnaly_RtcLocalTime, KEY_TYPE_PASSWORD, ACCESS_CLOSE_LOCK_TPYE);
+#endif
 		Access_Globle.ErrorTimes++;
 		if(Access_Globle.ErrorTimes >= 5)
 		{
@@ -418,6 +424,9 @@ void Touch_Proc(void)
 	{
 		Event_Remove(EVE_ENTER_LONG);
 		Access_Lock();
+#if (defined(SUPPORT_RECORD_LOC_STORE)&&(SUPPORT_RECORD_LOC_STORE == STD_TRUE))
+		LogCodeType = KEY_TYPE_LONG_KEY_PRESS_LOCK;
+#endif
 		return;
 	}
 }
